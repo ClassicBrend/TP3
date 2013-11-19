@@ -10,28 +10,68 @@ import org.jsoup.select.Elements;
 
 /**
  *
- * @author David
+ * @author  David Drouin
+ *          V0.2
  */
 public class InitialScrape {
     
     public static void main(String[] args) throws IOException{
         getRunners();
-        //getIndividualRunnerDetails("R12708");
-
-
-
-
+        getIndividualRunnerDetails("R12708");
+        System.out.println("RunnerList and individual runner details scraped successfully!\n\n");
     }
     
+    /*
+        passed in variable: runnerID (String)
+        Grabs all the races ran by one runner which is chosen by the runnerID
+        
+    */
     public static void getIndividualRunnerDetails(String runnerID) throws IOException{
         final String runnerURL ="http://www.scottishhillracing.co.uk/RunnerDetails.aspx?FromSearch=true&RunnerID=" + runnerID;
         Document doc = Jsoup.connect(runnerURL).get();
+        Element racesRan = doc.select("span[id=lblGridRacesRun]").first();
         Element table = doc.select("table[id=dgRunnerResults]").first();
         
+        String racesSplit = racesRan.text();
+        if(racesSplit.contains("races"))
+            racesSplit = racesSplit.replace(" races","");
+        else
+            racesSplit = racesSplit.replace(" race", "");
+        
+        int ran = Integer.parseInt(racesSplit);
+        
         Iterator<Element> position = table.select("td[width=50]").iterator();
-        System.out.println(position.next().text());
+        Iterator<Element> raceName = table.select("td[width=275]").iterator();
+        Iterator<Element> dateOfRace = table.select("td[width=80]").iterator();
+        Iterator<Element> timeOfRace = table.select("td[width=60]").iterator();
+        Iterator<Element> percentWin = table.select("td[width=95]").iterator();
+       
+        String content = "Position, RaceName,Date,Time,Winner\n";
+        
+        for(int i = 0; i < ran; i++){
+            String name = raceName.next().text();
+            content += position.next().text();
+            if(name.contains(","))
+                name = name.replace(","," ");
+            content += "," + name;
+            content += "," + dateOfRace.next().text();
+            content += "," + timeOfRace.next().text();
+            content += "," + percentWin.next().text();
+            if(i != 11)
+                content += "\n";
+        }
+        
+        //System.out.print(content);
+        deleteOldCsv("CSVFiles/Individual/" + runnerID);
+        writeOutCsv("CSVFiles/Individual/" + runnerID, content);
     }
     
+    /*
+        Grabs the page for the relevant club, in this instance its only the westies club
+        Grabs al links and the runner table
+        Selects the data needed with doc select and/or pattern matching
+        calls writeOutCsv with the relevant data
+    */
     public static void getRunners() throws IOException{
         final String clubURL = "http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076";
         Document doc = Jsoup.connect(clubURL).get();
@@ -43,12 +83,12 @@ public class InitialScrape {
         Iterator<Element> genEl = runnerTable.select("td[width=60]").iterator();
        
         String linkContent = links.outerHtml();
-        String pattern = ".\\d\\d\\d\\d";
+        String pattern = ".\\d\\d\\d\\d*";
         
         // Create the pattern object
         Pattern pat = Pattern.compile(pattern);
         
-        // Create a lovely matcher object
+        // Create a matcher object
         Matcher match = pat.matcher(linkContent);
         
         String linkText = links.text();
@@ -65,42 +105,60 @@ public class InitialScrape {
             //System.out.println(matchedNumber);
             count++;
         } 
-        deleteOldCSV("runnerDetails");
+        deleteOldCsv("CSVFiles/RunnerList/runnerDetails");
+        writeOutCsv("CSVFiles/RunnerList/runnerDetails", "Surname,Forename,runnerID,averageWin,racesRecorded,gender");
+
         for (int i = 0; i < runners.length;i++) {
             String name = runners[i];
-            RunnerDetails(name,matchArray[i],perWinEl.next().text(),racRecEl.next().text(), genEl.next().text());
+            RunnerDetails(name,matchArray[i],perWinEl.next().text(),racRecEl.next().text(), genEl.next().text(), runners.length, i);
+            getIndividualRunnerDetails(matchArray[i]);
         }
     }
     
-    public static void RunnerDetails(String name, String rID,String avgWin, String racRec,String gen){
+    /*
+        passed in variables: name, rID, avgWin, racRec, gen, runners, runner(String, String,String,String,String,int,int)
+        Splits up the name into first name and second name
+        Prints out scraping progress
+        then calls writeOutCsv with the relevant data.
+    */
+    public static void RunnerDetails(String name, String rID,String avgWin, String racRec,String gen, int runners, int runner){
         String fullName = name;
         String[] split = fullName.split(",");
         String secondName = split[0];
         String firstName = split[1];
-        
-        System.out.println("first name:\t" + firstName + "\nsecond name:\t" + 
-                secondName + "\nRunner ID:\t" + rID + "\nAvg % Win:\t" + avgWin +  
-                "\nRaces Recorded:\t" + racRec + "\nGender:\t\t" + gen + "\n-----\n");
-        writeOutCsv("runnerDetails",firstName + "," +
-                secondName + "," +rID + "," + avgWin + "," + racRec + "," + gen);
+//        System.out.println("first name:\t" + firstName + "\nsecond name:\t" + 
+//                secondName + "\nRunner ID:\t" + rID + "\nAvg % Win:\t" + avgWin +  
+//                "\nRaces Recorded:\t" + racRec + "\nGender:\t\t" + gen + "\n-----\n");
+        System.out.println(runner + "\\" + runners + " processed");
+        writeOutCsv("CSVFiles/RunnerList/runnerDetails",secondName + "," +
+                firstName + "," +rID + "," + avgWin + "," + racRec + "," + gen);
     }
     
+    /*
+        passed in variables: path, content(String,String)
+        Writes out what was passed in as content to what was given as path.
+    */
     public static void writeOutCsv(String path, String content){
         try{
-        File output = new File(path + ".csv");
-        
-        if(!output.exists())
-            output.createNewFile();
-        
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(output, true)));
-        out.println(content);
-        out.close();
-        } catch (IOException e) {
-                e.printStackTrace();
+            File output = new File(path + ".csv");
+
+            if(!output.exists())
+                output.createNewFile();
+
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(output, true)));
+            out.println(content);
+            out.close();
+            } catch (IOException e) {
+                    e.printStackTrace();
         }
     }
     
-    public static void deleteOldCSV(String path){
+    /*
+        passed in variable: path(String)
+        checks if the file requested for deletion exists
+        if it does then the file is deleted.
+    */
+    public static void deleteOldCsv(String path){
         try{
             File file = new File(path + ".csv");
             
@@ -113,7 +171,4 @@ public class InitialScrape {
             e.printStackTrace();
         }
     }
-    
-    
-
 }

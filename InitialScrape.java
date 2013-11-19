@@ -16,7 +16,6 @@ public class InitialScrape {
     
     public static void main(String[] args) throws IOException{
         getRunners();
-        getIndividualRunnerDetails("R12708");
         System.out.println("RunnerList and individual runner details scraped successfully!\n\n");
     }
     

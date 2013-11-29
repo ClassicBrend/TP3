@@ -202,10 +202,8 @@ public class InitialScrape {
         raceList.clear();
         raceList.addAll(raceSet);
         deleteOldCsv("CSVFiles/racesRan");
-        System.out.println("Deleted");
         for(int i = 0; i < raceList.size();i++){
             writeOutCsv("CSVFiles/racesRan", raceList.get(i).toString());
-            System.out.println(raceList.get(i).toString());
         }
     }
 }

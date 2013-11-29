@@ -1,7 +1,11 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,7 +19,9 @@ import org.jsoup.select.Elements;
 public class InitialScrape {
     
     public static void main(String[] args) throws IOException{
+        deleteOldCsv("CSVFiles/racesRan");
         getRunners();
+        checkDupes();
         System.out.println("RunnerList and individual runner details scraped successfully!\n\n");
     }
     
@@ -25,6 +31,7 @@ public class InitialScrape {
         
     */
     public static void getIndividualRunnerDetails(String runnerID) throws IOException{
+        String nameOfRace = null;
         final String runnerURL ="http://www.scottishhillracing.co.uk/RunnerDetails.aspx?FromSearch=true&RunnerID=" + runnerID;
         Document doc = Jsoup.connect(runnerURL).get();
         Element racesRan = doc.select("span[id=lblGridRacesRun]").first();
@@ -57,11 +64,13 @@ public class InitialScrape {
             content += "," + percentWin.next().text();
             if(i != 11)
                 content += "\n";
+            nameOfRace = name;
         }
         
         //System.out.print(content);
         deleteOldCsv("CSVFiles/Individual/" + runnerID);
         writeOutCsv("CSVFiles/Individual/" + runnerID, content);
+        writeOutCsv("CSVFiles/racesRan", nameOfRace);
     }
     
     /*
@@ -167,6 +176,36 @@ public class InitialScrape {
             
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+    
+    public static void checkDupes(){
+        File file = new File("CSVFiles/racesRan.csv");
+        ArrayList raceList = new ArrayList();
+        HashSet raceSet = new HashSet();
+        try{
+            Scanner input = new Scanner(file);
+            
+            while(input.hasNextLine()){
+                String line = input.nextLine();
+                raceList.add(line);
+                System.out.println(line);
+                
+            }
+            
+            
+        }catch(Exception e){
+            
+        }
+        
+        raceSet.addAll(raceList);
+        raceList.clear();
+        raceList.addAll(raceSet);
+        deleteOldCsv("CSVFiles/racesRan");
+        System.out.println("Deleted");
+        for(int i = 0; i < raceList.size();i++){
+            writeOutCsv("CSVFiles/racesRan", raceList.get(i).toString());
+            System.out.println(raceList.get(i).toString());
         }
     }
 }

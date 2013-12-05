@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,18 +21,25 @@ import org.jsoup.select.Elements;
 public class InitialScrape { 
     
     public static String[] publicRunners = new String[75];
+    static AtomicInteger counter = new AtomicInteger(0);
     
     public static void main(String[] args) throws IOException{
         ExecutorService exec = Executors.newCachedThreadPool();
         deleteOldCsv("CSVFiles/racesRan");
         getRunners();
         for(int i = 0; i < publicRunners.length; i++){
-            exec.submit(new Process(i,publicRunners[i]));;
+            exec.submit(new Process(i,publicRunners[i]) ); 
         }
         
-        checkDupes();
         exec.shutdown();
-        System.out.println("RunnerList and individual runner details scraped successfully!\n\n");
+        if(counter.get() > 0){
+            System.out.println("TERMINATION");
+        }
+        if(counter.get() == 1){
+            System.out.println("COUNT 0");
+        }
+        
+        System.out.println("RunnerList created, creating individual runners files\n");
 
     }
 
@@ -95,7 +103,6 @@ public class InitialScrape {
         String[] split = fullName.split(",");
         String secondName = split[0];
         String firstName = split[1];
-        System.out.println(runner + "\\" + runners + " processed");
         writeOutCsv("CSVFiles/RunnerList/runnerDetails",secondName + "," +
                 firstName + "," +rID + "," + avgWin + "," + racRec + "," + gen);
     }
@@ -147,11 +154,13 @@ public class InitialScrape {
             
             while(input.hasNextLine()){
                 String line = input.nextLine();
-                raceList.add(line);                
+                raceList.add(line);  
+
             }
 
         }catch(Exception e){}
-
+        
+        
         
         raceSet.addAll(raceList);
         raceList.clear();

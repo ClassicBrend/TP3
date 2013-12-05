@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
@@ -16,7 +17,8 @@ class Process implements Runnable {
     }
 
     public void run() {
-String nameOfRace = null;
+        InitialScrape.counter.incrementAndGet();
+        String nameOfRace = null;
         final String runnerURL ="http://www.scottishhillracing.co.uk/RunnerDetails.aspx?FromSearch=true&RunnerID=" + runnerID;
         Document doc = null;
         try {
@@ -61,6 +63,13 @@ String nameOfRace = null;
         InitialScrape.deleteOldCsv("CSVFiles/Individual/" + runnerID);
         InitialScrape.writeOutCsv("CSVFiles/Individual/" + runnerID, content);
         InitialScrape.writeOutCsv("CSVFiles/racesRan", nameOfRace);
+        
+
+        InitialScrape.counter.decrementAndGet();
+        System.out.println(InitialScrape.counter.get() + " left to process");
+        if(InitialScrape.counter.get() == 0){
+            InitialScrape.checkDupes();
+        }
     
     }
 }

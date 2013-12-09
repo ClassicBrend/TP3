@@ -62,13 +62,12 @@ class Process implements Runnable {
         //System.out.print(content);
         InitialScrape.deleteOldCsv("CSVFiles/Individual/" + runnerID);
         InitialScrape.writeOutCsv("CSVFiles/Individual/" + runnerID, content);
-        InitialScrape.writeOutCsv("CSVFiles/racesRan", nameOfRace);
-        
+        InitialScrape.raceSet.add(nameOfRace);       
 
         InitialScrape.counter.decrementAndGet();
         System.out.println(InitialScrape.counter.get() + " left to process");
         if(InitialScrape.counter.get() == 0){
-            InitialScrape.checkDupes();
+            InitialScrape.GenerateRaces(InitialScrape.raceSet);
         }
     
     }

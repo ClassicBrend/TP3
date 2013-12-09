@@ -1,10 +1,12 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
+import static java.lang.reflect.Array.set;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +25,9 @@ public class InitialScrape {
     public static String[] publicRunners = new String[75];
     static AtomicInteger counter = new AtomicInteger(0);
     
+    public static HashSet raceSet = new HashSet();
+
+    
     public static void main(String[] args) throws IOException{
         ExecutorService exec = Executors.newCachedThreadPool();
         deleteOldCsv("CSVFiles/racesRan");
@@ -32,13 +37,6 @@ public class InitialScrape {
         }
         
         exec.shutdown();
-        if(counter.get() > 0){
-            System.out.println("TERMINATION");
-        }
-        if(counter.get() == 1){
-            System.out.println("COUNT 0");
-        }
-        
         System.out.println("RunnerList created, creating individual runners files\n");
 
     }
@@ -143,31 +141,14 @@ public class InitialScrape {
     }
     
     /*
-        Inefficient, will fix
+        Takes in the hashset of races and writes them out to a csv file.
     */
-    public static void checkDupes(){
+    public static void GenerateRaces(HashSet races){
         File file = new File("CSVFiles/racesRan.csv");
-        ArrayList raceList = new ArrayList();
-        HashSet raceSet = new HashSet();
-        try{
-            Scanner input = new Scanner(file);
-            
-            while(input.hasNextLine()){
-                String line = input.nextLine();
-                raceList.add(line);  
-
-            }
-
-        }catch(Exception e){}
+        Iterator hashIter = races.iterator();
         
-        
-        
-        raceSet.addAll(raceList);
-        raceList.clear();
-        raceList.addAll(raceSet);
-        deleteOldCsv("CSVFiles/racesRan");
-        for(int i = 0; i < raceList.size();i++){
-            writeOutCsv("CSVFiles/racesRan", raceList.get(i).toString());
+        while(hashIter.hasNext()){
+            writeOutCsv("CSVFiles/racesRan", hashIter.next().toString());
         }
     }
 }

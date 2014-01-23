@@ -19,19 +19,20 @@ class RaceProcess implements Runnable {
     }
 
     public void run() {
-        Main.runnerCounter.incrementAndGet();
+        Main.raceCounter.incrementAndGet();
    
         Document doc = null;
         final String url = "http://www.scottishhillracing.co.uk/RaceDetails.aspx?";
  
         
         try {
-            doc = Jsoup.connect(url+"RaceID="+raceID).timeout(5*1000).get();
+            doc = Jsoup.connect(url+"RaceID="+raceID).timeout(Main.timeOutPeriod).ignoreHttpErrors(true).get();
 
         } catch (IOException ex) {
             Main.lblError.setText(ex.getMessage());
         }
         
+        Element raceName = doc.getElementById("lblRaceName");
         Element menRecordHolderlbl = doc.getElementById("lblMensRecordHolder");
         Element menRecordHolderhyp = doc.getElementById("hypMensRecordHolder");
         Element womenRecordHolderlbl = doc.getElementById("lblWomensRecordHolder");
@@ -62,29 +63,44 @@ class RaceProcess implements Runnable {
         }
         
         String ven = venue.text();
-        ven = ven.replace(",", "-");
+        ven = ven.replace(",", ".");
+//        ven = ven.replace("-", "");
         
-        Main.deleteOldCsv(Main.jarPath+"CSVFiles/RaceList/"+raceID);
+        String dist = distance.text();
+        dist = dist.replace("km","");
+        dist.trim();
+        String cl = climb.text();
+        cl = cl.replace("m", "");
+        cl.trim();
+        String race = raceName.text();
+        race = race.replace(",",".");
         
-        Main.writeOutCsv("CSVFiles/RaceList/"+raceID, ven + "," + distance.text() + "," + climb.text() + "," + mensRecordTime.text() + "," + mensRecordYear.text()
-         + "," + womensRecordTime.text() + "," + womensRecordYear.text() + "," + womensRecordName.text());
+        
+        
+        String mensTime = mensRecordTime.text();
+//        mensTime = mensTime.replace(" -", "");
+        String womensTime = womensRecordTime.text();
+//        womensTime = womensTime.replace(" -","");
 
-        if(Main.runnerCounter.get() == 0){
-            System.out.println("Scrape properly finished");
-        }
-        
-        
-//        System.out.println(venue.text());
-//        System.out.println(distance.text());
-//        System.out.println(climb.text());
-//        System.out.println(mensRecordTime.text());
-//        System.out.println(mensRecordYear.text());
-//        System.out.println(mensRecordName.text());
-//        System.out.println(womensRecordTime.text());
-//        System.out.println(womensRecordYear.text());
-//        System.out.println(womensRecordName.text());
-//        System.out.println("-------");
-
-        
+        Main.writeOutCsv("CSVFiles/RaceList/races",raceID + "," + race + "," + cleanString(ven) + "," + cleanString(dist) + "," + cleanString(cl) + "," + cleanString(mensTime) + "," + cleanString(mensRecordYear.text())
+         + "," +  cleanString(mensRecordName.text()) + "," + cleanString(womensTime) + "," + cleanString(womensRecordYear.text()) + "," + cleanString(womensRecordName.text()));
+        Main.raceCounter.decrementAndGet();
+        if(Main.raceCounter.get() == 0){
+            Main.btnDatabase.setEnabled(true);
+            Main.btnDrop.setEnabled(true);
+            Main.scrapeCompleted = true;
+            Main.btnStart.setText("Visit website");
+            Main.lblScrape.setText("Scrape completed");
+            //Main.uploadTables();
+        }      
     }
+    
+    public String cleanString(String s){
+        s = s.replace("-","");
+        s = s.replace("(","");
+        s = s.replace(")","");
+        s = s.trim();        
+        return s;
+    }
+
 }

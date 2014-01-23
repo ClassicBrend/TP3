@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
@@ -19,20 +20,24 @@ import org.jsoup.select.Elements;
 import javax.swing.*;
 
 public class Main extends JFrame{
-    
+   
     JFrame testFrame;
-    public static  JButton btnStart,btnWeb;
+    public static  JButton btnStart,btnDatabase,btnDrop;
     public static JLabel lblScrape,lblError;
     
-    public static String[] publicRunners = new String[165];
+    //public static String[] publicRunners = new String[164];
+    public static ArrayList<String> publicRunners = new ArrayList<String>();
     static AtomicInteger runnerCounter = new AtomicInteger(0);
     static AtomicInteger raceCounter = new AtomicInteger(0);
     
     public static HashSet raceSet = new HashSet();
     
     public static boolean ranScrape = false;
+    public static boolean scrapeCompleted = false;
     
     public static String jarPath;
+    
+    public static int timeOutPeriod = 0;
     
     public Main() throws URISyntaxException{
         jarPath = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
@@ -60,17 +65,27 @@ public class Main extends JFrame{
         
 
         
-        btnWeb = new JButton("View Website");
-        btnWeb.setBounds(180,130,150,30);
-        btnWeb.addActionListener(new ActionListener(){
+        btnDatabase = new JButton("Update Tables");
+        btnDatabase.setBounds(180,130,150,30);
+        btnDatabase.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                btnWebActionPerformed();
+                btnTableActionPerformed();
+            }
+            
+        });
+        btnDrop = new JButton("Clear Table");
+        btnDrop.setBounds(350,130,150,30);
+        btnDrop.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnDropActionPerformed();
             }
             
         });
         
-        btnWeb.setEnabled(false);
+        btnDatabase.setEnabled(false);
+        btnDrop.setEnabled(false);
         
         lblScrape = new JLabel("Data has not been scraped...");
         lblScrape.setBounds(10,100,300,30);
@@ -79,14 +94,15 @@ public class Main extends JFrame{
         lblError.setBounds(10,50,500,30);
         
         pnlButtons.add(btnStart);
-        pnlButtons.add(btnWeb);
+        pnlButtons.add(btnDatabase);
+        pnlButtons.add(btnDrop);
         pnlButtons.add(lblScrape);
         pnlButtons.add(lblError);
         
 
         
         setTitle("Westies Runners Scrape");
-        setSize(350,200);
+        setSize(530,200);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -110,82 +126,106 @@ public class Main extends JFrame{
 
     }
     
-    private void btnStartActionPerformed() {    
-        // Creates the necessary folders if they don't already exist
-        File Individual = new File(jarPath + "CSVFiles/Individual");
-        File RunnerList = new File(jarPath + "CSVFiles/RunnerList");
-        File RaceList = new File(jarPath + "CSVFiles/RaceList");
-        Individual.mkdirs();
-        RunnerList.mkdirs();
-        RaceList.mkdirs();
-        
-        if(!ranScrape){
-            lblScrape.setText("Scraping...");
-            lblError.setText("");
-            ranScrape = true;
-            try {
-                
+    private void btnStartActionPerformed() { 
+        if(scrapeCompleted == false){
+            // Creates the necessary folders if they don't already exist
+            File Individual = new File(jarPath + "CSVFiles/Individual");
+            File RunnerList = new File(jarPath + "CSVFiles/RunnerList");
+            File RaceList = new File(jarPath + "CSVFiles/RaceList");
+            Individual.mkdirs();
+            RunnerList.mkdirs();
+            RaceList.mkdirs();
+
+            if(!ranScrape){
+                lblScrape.setText("Scraping...");
+                lblError.setText("");
+                ranScrape = true;
                 ExecutorService exec = Executors.newCachedThreadPool();
-                deleteOldCsv("CSVFiles/racesRan");
-                deleteOldCsv("CSVFiles/RunnerList/runnerDetails");
+                deleteOldCsv(Main.jarPath+"CSVFiles/RaceList/races");
                 deleteOldCsv(jarPath+"CSVFiles/racesRan");
                 deleteOldCsv(jarPath+"CSVFiles/RunnerList/runnerDetails");
-
                 beginScrape();
-                for(int i = 0; i < publicRunners.length; i++){
-                    exec.submit(new RunnerProcess(i,publicRunners[i]) ); 
+                for(int i = 0; i < publicRunners.size(); i++){
+                    exec.submit(new RunnerProcess(i, publicRunners.get(i)) );
                 }
-
                 exec.shutdown();
                 System.out.println("RunnerList created, creating individual runners files\n");
-
+            }
+        } else {
+                String page = "http://www.westiesrunners.com";
+            try {
+                java.awt.Desktop.getDesktop().browse(java.net.URI.create(page));
             } catch (IOException ex) {
-                Main.lblError.setText(ex.getMessage());
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
     
-    private void btnWebActionPerformed(){
-        try{
-            String url = "http://www.westiesrunners.com";
-            java.awt.Desktop.getDesktop().browse(java.net.URI.create(url));
-        }catch(java.io.IOException e){
-            Main.lblError.setText(e.getMessage());
-        }
+    private void btnTableActionPerformed(){
+
+        DatabaseAccess db = new DatabaseAccess();
+        db.go();
+        db.dropTable("test");
+        db.dropTable("races");
+        db.updateRaceTable();
+        db.updateRunnerTable();
+        System.out.println("GREAT SUCCESS");
+        
+        
+//        try{
+//            String url = "http://www.westiesrunners.com";
+//            java.awt.Desktop.getDesktop().browse(java.net.URI.create(url));
+//        }catch(java.io.IOException e){
+//            Main.lblError.setText(e.getMessage());
+//        }
+    }
+    
+    private void btnDropActionPerformed(){
+        DatabaseAccess db = new DatabaseAccess();
+        db.go();
+        db.dropRaceTable();
+        lblScrape.setText("Race table cleared");
     }
         
-    public static void beginScrape() throws IOException{
-        int amount = 0;
-        final String clubURL = "http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076";
-        Document doc = Jsoup.connect(clubURL).timeout(5*1000).get();
-        writeOutCsv("CSVFiles/RunnerList/runnerDetails", "Surname,Forename,runnerID,averageWin,racesRecorded,gender");
-
-
-        getDetails(doc,amount);
-        
-        Element postBackCol = doc.select("td[colspan=6]").first();
-        Elements postBackLinks = postBackCol.select("a[href*=doPostBack");
-        int linkCount = Integer.parseInt(postBackLinks.last().text());
-        
-        if(linkCount > 0){
-            for(int i = 1; i < linkCount;i++){
-                amount += 75;
-                String eventVal = doc.select("input[id=__EVENTVALIDATION]").first().val();
-                String vState = doc.select("input[id=__VIEWSTATE]").first().val();
-
-                Document docu = Jsoup.connect("http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076")
+    public static void beginScrape(){        
+        try {
+            int amount = 0;
+            final String clubURL = "http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076";
+            //Document doc = Jsoup.connect(clubURL).timeout(timeOutPeriod).get();
+            Document doc = Jsoup.connect(clubURL).timeout(timeOutPeriod).ignoreHttpErrors(true).get();
+            //writeOutCsv("CSVFiles/RunnerList/runnerDetails", "Surname,Forename,runnerID,averageWin,racesRecorded,gender");
+            
+            
+            getDetails(doc,amount);
+            
+            Element postBackCol = doc.select("td[colspan=6]").first();
+            Elements postBackLinks = postBackCol.select("a[href*=doPostBack");
+            int linkCount = Integer.parseInt(postBackLinks.last().text());
+            
+            
+            if(linkCount > 0){
+                for(int i = 1; i < linkCount;i++){
+                    amount += 75;
+                    String eventVal = doc.select("input[id=__EVENTVALIDATION]").first().val();
+                    String vState = doc.select("input[id=__VIEWSTATE]").first().val();
+                    
+                    
+                    Document docu = Jsoup.connect("http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076")
                             .data("__EVENTTARGET", "dgRunners$ctl79$ctl0"+(i))
                             .data("__EVENTARGUMENT","")
                             .data("__LASTFOCUS","")
                             .data("__VIEWSTATE",vState)
                             .data("__EVENTVALIDATION",eventVal)
                             .userAgent("Mozilla")
-                            .timeout(5*1000)
-                        .post();
-
-                getDetails(docu,amount);
+                            .timeout(0)
+                            .post();
+                    
+                    getDetails(docu,amount);
+                }
             }
-        } 
+        } catch (IOException ex) { 
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     
@@ -223,8 +263,14 @@ public class Main extends JFrame{
 
         for (int i = 0; i < runners.length;i++,count++) {
             String name = runners[i];
-            RunnerDetails(name,matchArray[i],perWinEl.next().text(),racRecEl.next().text(), genEl.next().text(), runners.length, i);
-            publicRunners[count] = matchArray[i];
+            String avgWin = perWinEl.next().text();
+            avgWin = avgWin.substring(0, avgWin.length()-1);
+            double avg = Double.parseDouble(avgWin);
+            String races = racRecEl.next().text();
+            int racesRan = Integer.parseInt(races);
+            RunnerDetails(name,matchArray[i],avg,racesRan, genEl.next().text(), runners.length, i);
+            //publicRunners[count] = matchArray[i];
+            publicRunners.add(matchArray[i]);
         }
         
     }
@@ -236,13 +282,19 @@ public class Main extends JFrame{
         Prints out scraping progress
         then calls writeOutCsv with the relevant data.
     */
-    public static void RunnerDetails(String name, String rID,String avgWin, String racRec,String gen, int runners, int runner){
+    public static void RunnerDetails(String name, String rID,double avgWin, int racRec,String gen, int runners, int runner){
+        //DatabaseAccess db = new DatabaseAccess();
+       // db.go();
+        
+        
+        
         String fullName = name;
         String[] split = fullName.split(",");
         String secondName = split[0];
         String firstName = split[1];
-        writeOutCsv("CSVFiles/RunnerList/runnerDetails",secondName + "," +
-                firstName + "," +rID + "," + avgWin + "," + racRec + "," + gen);
+        writeOutCsv("CSVFiles/RunnerList/runnerDetails",rID + "," + secondName + "," +
+                firstName +  "," + avgWin + "," + racRec + "," + gen);
+        //db.updateRunnerTable(rID, secondName, firstName, avgWin, racRec, gen);
 
     }
     
@@ -286,15 +338,15 @@ public class Main extends JFrame{
         Takes in the hashset of races and writes them out to a csv file.
     */
     public static void GenerateRaces(HashSet races){
-        btnWeb.setEnabled(true);
-        lblScrape.setText("Scraping completed");
+        
+       
         //File file = new File("CSVFiles/racesRan.csv");
         File file = new File("racesRan.csv");
         Iterator hashIter = races.iterator();
         
         ExecutorService exec2 = Executors.newCachedThreadPool();
         
-        int count = 1;
+        int count = 0;
         while(hashIter.hasNext()){
             String raceInfo = hashIter.next().toString();
             writeOutCsv("CSVFiles/racesRan", raceInfo);
@@ -316,7 +368,7 @@ public class Main extends JFrame{
  
         
         try {
-            doc = Jsoup.connect(url+"RaceID="+raceInfo).timeout(5*1000).get();
+            doc = Jsoup.connect(url+"RaceID="+raceInfo).timeout(timeOutPeriod).ignoreHttpErrors(true).get();
 
         } catch (IOException ex) {
             Main.lblError.setText(ex.getMessage());
@@ -370,6 +422,16 @@ public class Main extends JFrame{
 //        System.out.println(womensRecordName.text());
 //        System.out.println("-------");
 
+        
+    }
+    
+    
+    public static void uploadTables() {
+//        DatabaseAccess db = new DatabaseAccess();
+//        db.go();
+//        //db.dropRaceTable();
+//        db.updateRaceTable();
+//        System.out.println("GREAT SUCCESS");
         
     }
     

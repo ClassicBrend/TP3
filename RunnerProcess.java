@@ -16,6 +16,7 @@ class RunnerProcess implements Runnable {
     public RunnerProcess(int id, String runnerID){
         this.id = id;
         this.runnerID = runnerID;
+        System.out.println("ID: " + id + "RiD: " + runnerID);
     }
 
     public void run() {
@@ -27,7 +28,7 @@ class RunnerProcess implements Runnable {
         final String runnerURL ="http://www.scottishhillracing.co.uk/RunnerDetails.aspx?FromSearch=true&RunnerID=" + runnerID;
         Document doc = null;
         try {
-            doc = Jsoup.connect(runnerURL).timeout(5*1000).get();
+            doc = Jsoup.connect(runnerURL).timeout(0).get();
         } catch (IOException ex) {
             System.out.println("READ TIMED OUT...");
             Main.lblError.setText("READ TIMED OUT...");
@@ -61,13 +62,16 @@ class RunnerProcess implements Runnable {
         for(int i = 0; i < ran; i++){
             String name = raceName.next().text();
             String year = dateOfRace.next().text();
+            String avgWin = percentWin.next().text();
+            avgWin = avgWin.substring(0, avgWin.length()-1);
+           
             content += position.next().text();
             if(name.contains(","))
                 name = name.replace(","," ");
             content += "," + name;
             content += "," + year;
             content += "," + timeOfRace.next().text();
-            content += "," + percentWin.next().text();
+            content += "," + avgWin;
             if(i != (ran-1))
                 content += "\n";
             nameOfRace = name;

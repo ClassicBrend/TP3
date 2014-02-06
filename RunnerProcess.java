@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,7 +17,6 @@ class RunnerProcess implements Runnable {
     public RunnerProcess(int id, String runnerID){
         this.id = id;
         this.runnerID = runnerID;
-        System.out.println("ID: " + id + "RiD: " + runnerID);
     }
 
     public void run() {
@@ -37,10 +37,6 @@ class RunnerProcess implements Runnable {
         Element racesRan = doc.select("span[id=lblGridRacesRun]").first();
         Element table = doc.select("table[id=dgRunnerResults]").first();
         Elements links = doc.select("a[href*=RaceDetails]");
-        String linkContent = links.outerHtml();
-        
-        String raceID = linkContent.substring(33,40);
-
         
         
         String racesSplit = racesRan.text();
@@ -56,10 +52,13 @@ class RunnerProcess implements Runnable {
         Iterator<Element> dateOfRace = table.select("td[width=80]").iterator();
         Iterator<Element> timeOfRace = table.select("td[width=60]").iterator();
         Iterator<Element> percentWin = table.select("td[width=95]").iterator();
-       
-        String content = "Position, RaceName,Date,Time,Winner\n";
-        
+        Iterator<Element> raceIdElement = links.iterator();
+
+        String content = "";
+        String raceID = "";
         for(int i = 0; i < ran; i++){
+            raceID  = raceIdElement.next().toString();
+            raceID = raceID.substring(33,40);
             String name = raceName.next().text();
             String year = dateOfRace.next().text();
             String avgWin = percentWin.next().text();
@@ -78,7 +77,12 @@ class RunnerProcess implements Runnable {
             String[] yearSplit = year.split("/");
             theYear = yearSplit[2];
             
+            System.out.println("RACE ID STRING = " +raceID);
+            Main.raceSet.add(raceID);
+            
         }
+      
+
         
         //System.out.print(content);
         Main.deleteOldCsv("CSVFiles/Individual/" + runnerID);

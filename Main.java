@@ -38,6 +38,8 @@ public class Main extends JFrame{
     public static String jarPath;
     
     public static int timeOutPeriod = 0;
+    public static DatabaseAccess db = new DatabaseAccess();
+
     
     public Main() throws URISyntaxException{
         jarPath = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
@@ -109,9 +111,7 @@ public class Main extends JFrame{
     }
     
     public static void main(String[] args) throws URISyntaxException {
-
-        
-        SwingUtilities.invokeLater(new Runnable() {
+         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -141,9 +141,9 @@ public class Main extends JFrame{
                 lblError.setText("");
                 ranScrape = true;
                 ExecutorService exec = Executors.newCachedThreadPool();
-                deleteOldCsv(Main.jarPath+"CSVFiles/RaceList/races");
-                deleteOldCsv(jarPath+"CSVFiles/racesRan");
-                deleteOldCsv(jarPath+"CSVFiles/RunnerList/runnerDetails");
+                deleteOldCsv("CSVFiles/RaceList/races");
+                deleteOldCsv("CSVFiles/racesRan");
+                deleteOldCsv("CSVFiles/RunnerList/runnerDetails");
                 beginScrape();
                 for(int i = 0; i < publicRunners.size(); i++){
                     exec.submit(new RunnerProcess(i, publicRunners.get(i)) );
@@ -162,32 +162,31 @@ public class Main extends JFrame{
     }
     
     private void btnTableActionPerformed(){
-
-        DatabaseAccess db = new DatabaseAccess();
+/////////////ORIGINALCODE///////////////////////////
+//        DatabaseAccess db = new DatabaseAccess();
+//        db.go();
+//        db.dropTable("test");
+//        db.dropTable("races");
+//        db.updateRaceTable();
+//        db.updateRunnerTable();
+//        System.out.println("GREAT SUCCESS");
+/////////////////////////////////////////////////////
+        
         db.go();
         db.dropTable("test");
         db.dropTable("races");
         db.updateRaceTable();
         db.updateRunnerTable();
-        System.out.println("GREAT SUCCESS");
+        db.createRunnerTable(publicRunners);
         
-        
-//        try{
-//            String url = "http://www.westiesrunners.com";
-//            java.awt.Desktop.getDesktop().browse(java.net.URI.create(url));
-//        }catch(java.io.IOException e){
-//            Main.lblError.setText(e.getMessage());
-//        }
     }
     
     private void btnDropActionPerformed(){
-        DatabaseAccess db = new DatabaseAccess();
-        db.go();
         db.dropRaceTable();
         lblScrape.setText("Race table cleared");
     }
         
-    public static void beginScrape(){        
+    public static void beginScrape(){  
         try {
             int amount = 0;
             final String clubURL = "http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076";
@@ -325,7 +324,7 @@ public class Main extends JFrame{
     */
     public static void deleteOldCsv(String path){
         try{
-            File file = new File(path + ".csv");
+            File file = new File(jarPath + path + ".csv");
             
             if(file.exists()){
                file.delete();
@@ -338,9 +337,6 @@ public class Main extends JFrame{
         Takes in the hashset of races and writes them out to a csv file.
     */
     public static void GenerateRaces(HashSet races){
-        
-       
-        //File file = new File("CSVFiles/racesRan.csv");
         File file = new File("racesRan.csv");
         Iterator hashIter = races.iterator();
         
@@ -353,6 +349,7 @@ public class Main extends JFrame{
             
             exec2.submit(new RaceProcess(count,raceInfo));
             count++;
+            System.out.println(count);
             
         }
 

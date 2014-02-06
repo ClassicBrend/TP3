@@ -14,6 +14,7 @@ class RaceProcess implements Runnable {
     private String raceID;
     
     public RaceProcess(int id, String raceID){
+        System.out.println("RACE PROCESS - RACEID = " + raceID);
         this.id = id;
         this.raceID = raceID;
     }

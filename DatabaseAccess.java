@@ -164,6 +164,7 @@ public class DatabaseAccess {
                     }
             }
             System.out.println("All runner tables uploaded");
+            System.exit(0);
 
         } catch (Exception e) {
             e.printStackTrace();

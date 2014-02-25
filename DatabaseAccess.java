@@ -71,7 +71,6 @@ public class DatabaseAccess {
                         for(int i = 4; i < 10;i++){
                             if(i==4){
                                 if("N/A".equals(parts[i])){
-                                    System.out.println("FFFUUUUUU");
                                     parts[i] = "0";
                                 }
                             }
@@ -164,7 +163,7 @@ public class DatabaseAccess {
                     }
             }
             System.out.println("All runner tables uploaded");
-            System.exit(0);
+            
 
         } catch (Exception e) {
             e.printStackTrace();

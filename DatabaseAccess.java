@@ -46,7 +46,7 @@ public class DatabaseAccess {
 
     }
     public void updateRaceTable(){
-        Connection con = null;
+       Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
         //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
@@ -59,55 +59,24 @@ public class DatabaseAccess {
             //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
-            try {
-                
-                    File file = new File(Main.jarPath+"CSVFiles/RaceList/races.csv");
-                    Scanner input = new Scanner(file);
-                   
-                    while(input.hasNextLine()){
-                        String line = input.nextLine();
-                        String parts[] = line.split(",");
-                        
-                        for(int i = 4; i < 10;i++){
-                            if(i==4){
-                                if("N/A".equals(parts[i])){
-                                    parts[i] = "0";
-                                }
-                            }
-                            if(i==6||i==9){
-                                if(parts[i].isEmpty()){
-                                    parts[i] = "0";
-                                }
-                            }
-                            else{
-                                if(parts[i].isEmpty()){
-                                    parts[i] = "0";
-                                }
-                            }
-                        }
-                        Statement st = con.createStatement();
-                        String sql = "Insert into races "
-                                + "Values('"+parts[0]+"','"+parts[1]+"','"+ parts[2]+"', '"+parts[3]+"','"+parts[4]+"','"+parts[5]+"','"+parts[6]+"','"+parts[7]+"','"+parts[8]+"','"+parts[9]+"','"+parts[10]+"')";
+            Statement st = con.createStatement();
+            String path = Main.jarPath+"CSVFiles/RaceList/races.csv";
+            String sql = " LOAD DATA LOCAL INFILE '" + path +
+                "' INTO TABLE races " +
+                " FIELDS TERMINATED BY \',\' ENCLOSED BY \'\"'" +
+                " LINES TERMINATED BY \'\\n\'";
 
-                        System.out.println(sql + parts[4]);
-                        boolean update = st.execute(sql);
+            boolean update = st.execute(sql);
+           
+            System.out.println("All runner tables uploaded");
+            
 
-                       
-                    }
-                    
-
-                    
-                    
-            } catch (SQLException s) {
-                System.out.println("SQL statement is not executed!");
-                s.printStackTrace();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-        public void createRunnerTable(ArrayList<String> publicRunners){
+    // Create individual tables for the runners
+    public void createRunnersTable(ArrayList<String> publicRunners){
         Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
         //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
@@ -170,6 +139,118 @@ public class DatabaseAccess {
         }
     }
     
+    public void oldCreateRunnerTable(ArrayList<String> publicRunners){
+        Connection con = null;
+        String driver = "com.mysql.jdbc.Driver";
+        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
+        String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
+        System.out.println(url);
+        String db = "westies_db";
+        String dbUser = "westies_user";
+        String dbPasswd = "TeamBA2013";
+        try {
+            Class.forName(driver);
+            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
+            con = DriverManager.getConnection(url, dbUser, dbPasswd);
+
+
+           
+                    //String runnerID = publicRunners.get(i);
+
+                    File file = new File(Main.jarPath+"CSVFiles/Individual/runners.csv");
+                    Scanner input = new Scanner(file);
+                    
+                    Statement st = con.createStatement();
+                    String sql = "CREATE TABLE IF NOT EXISTS runner" + 
+                            "(runnerID varchar(10),"
+                            + "position int(3),"
+                            + "raceName varchar(128),"
+                            + "raceDate date,"
+                            + "time varchar(7),"
+                            + "winner double(10,1)"
+                            + ""
+                            + ")";
+                   
+                    boolean update = st.execute(sql);
+                   // Main.lblScrape.setText("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
+                    //System.out.println("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
+                    int counter = 0;
+                    while(input.hasNextLine()){
+                        counter++;
+                        System.out.println("Processing:" + counter + " out of " + publicRunners.size());
+                        String line = input.nextLine();
+                        String parts[] = line.split(",");
+                        String origDate = parts[3];
+                        String year = origDate.substring(6,10);
+                        String month = origDate.substring(3,5);
+                        String day = origDate.substring(0,2);
+                        String formattedDate = (year + "-" + month + "-" + day);
+                        
+                         
+                        st = con.createStatement();
+                        sql = "REPLACE INTO runner "
+                                + " Values('"+parts[0]+"','"+parts[1]+"','"+ parts[2]+"', '"+formattedDate+"','"+parts[4]+"','"+parts[5]+"')";
+
+                        
+                        update = st.execute(sql);
+
+                       
+                    }
+            
+            System.out.println("All runner tables uploaded");
+            
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void createRunnerTable(ArrayList<String> publicRunners){
+        Connection con = null;
+        String driver = "com.mysql.jdbc.Driver";
+        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
+        String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
+        System.out.println(url);
+        String db = "westies_db";
+        String dbUser = "westies_user";
+        String dbPasswd = "TeamBA2013";
+        try {
+            Class.forName(driver);
+            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
+            con = DriverManager.getConnection(url, dbUser, dbPasswd);
+
+            Statement st = con.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS runner" + 
+                    "(runnerID varchar(10),"
+                    + "position int(3),"
+                    + "raceName varchar(128),"
+                    + "raceDate date,"
+                    + "time varchar(7),"
+                    + "winner double(10,1)"
+                    + ""
+                    + ")";
+
+            boolean update = st.execute(sql);
+           // Main.lblScrape.setText("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
+            //System.out.println("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
+            int counter = 0;
+                    
+            st = con.createStatement();
+            String path = Main.jarPath+"CSVFiles/Individual/runners.csv";
+            sql = " LOAD DATA LOCAL INFILE '" + path +
+                "' INTO TABLE runner " +
+                " FIELDS TERMINATED BY \',\' ENCLOSED BY \'\"'" +
+                " LINES TERMINATED BY \'\\n\'";
+
+            update = st.execute(sql);
+           
+            System.out.println("All runner tables uploaded");
+            
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     
     public void dropRaceTable(){
         Connection con = null;
@@ -224,7 +305,7 @@ public class DatabaseAccess {
     }
     
     public void updateRunnerTable(){
-        Connection con = null;
+       Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
         //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
@@ -237,32 +318,18 @@ public class DatabaseAccess {
             //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
-            try {
-                
-                    File file = new File(Main.jarPath+"CSVFiles/RunnerList/runnerDetails.csv");
-                    Scanner input = new Scanner(file);
-                   
-                    while(input.hasNextLine()){
-                        String line = input.nextLine();
-                        String parts[] = line.split(",");
-                         
-                        Statement st = con.createStatement();
-                        String sql = "Insert into test "
-                                + "Values('"+parts[0]+"','"+parts[1]+"','"+ parts[2]+"', '"+parts[3]+"','"+parts[4]+"','"+parts[5]+"')";
+            Statement st = con.createStatement();
+            String path = Main.jarPath+"CSVFiles/RunnerList/runnerDetails.csv";
+            String sql = " LOAD DATA LOCAL INFILE '" + path +
+                "' INTO TABLE test " +
+                " FIELDS TERMINATED BY \',\' ENCLOSED BY \'\"'" +
+                " LINES TERMINATED BY \'\\n\'";
 
-                        System.out.println(sql);
-                        boolean update = st.execute(sql);
+            boolean update = st.execute(sql);
+           
+            System.out.println("All runner tables uploaded");
+            
 
-                       
-                    }
-                    
-
-                    
-                    
-            } catch (SQLException s) {
-                System.out.println("SQL statement is not executed!");
-                s.printStackTrace();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }

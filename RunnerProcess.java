@@ -60,22 +60,28 @@ class RunnerProcess implements Runnable {
             raceID  = raceIdElement.next().toString();
             raceID = raceID.substring(33,40);
             String name = raceName.next().text();
-            String year = dateOfRace.next().text();
+            String origDate = dateOfRace.next().text();
             String avgWin = percentWin.next().text();
             avgWin = avgWin.substring(0, avgWin.length()-1);
+            
+            String year = origDate.substring(6,10);
+            String month = origDate.substring(3,5);
+            String day = origDate.substring(0,2);
+            String formattedDate = (year + "-" + month + "-" + day);
+            System.out.println(formattedDate);
            
+            content += runnerID + ",";
             content += position.next().text();
             if(name.contains(","))
-                name = name.replace(","," ");
+                name = name.replace(",","");
             content += "," + name;
-            content += "," + year;
+            content += "," + formattedDate;
             content += "," + timeOfRace.next().text();
             content += "," + avgWin;
             if(i != (ran-1))
                 content += "\n";
             nameOfRace = name;
-            String[] yearSplit = year.split("/");
-            theYear = yearSplit[2];
+
             
             System.out.println("RACE ID STRING = " +raceID);
             Main.raceSet.add(raceID);
@@ -85,8 +91,8 @@ class RunnerProcess implements Runnable {
 
         
         //System.out.print(content);
-        Main.deleteOldCsv("CSVFiles/Individual/" + runnerID);
-        Main.writeOutCsv("CSVFiles/Individual/" + runnerID, content);
+
+        Main.writeOutCsv("CSVFiles/Individual/runners", content);
         
         //test.raceSet.add(theYear+"."+raceID);     
         Main.raceSet.add(raceID);

@@ -30,6 +30,7 @@ public class Main extends JFrame{
     static AtomicInteger runnerCounter = new AtomicInteger(0);
     static AtomicInteger raceCounter = new AtomicInteger(0);
     
+    
     public static HashSet raceSet = new HashSet();
     
     public static boolean ranScrape = false;
@@ -144,6 +145,7 @@ public class Main extends JFrame{
                 deleteOldCsv("CSVFiles/RaceList/races");
                 deleteOldCsv("CSVFiles/racesRan");
                 deleteOldCsv("CSVFiles/RunnerList/runnerDetails");
+                Main.deleteOldCsv("CSVFiles/Individual/runners");
                 beginScrape();
                 for(int i = 0; i < publicRunners.size(); i++){
                     exec.submit(new RunnerProcess(i, publicRunners.get(i)) );
@@ -175,6 +177,7 @@ public class Main extends JFrame{
         db.go();
         db.dropTable("test");
         db.dropTable("races");
+        db.dropTable("runner");
         db.updateRaceTable();
         db.updateRunnerTable();
         db.createRunnerTable(publicRunners);

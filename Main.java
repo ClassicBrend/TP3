@@ -1,3 +1,4 @@
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ import javax.swing.*;
 public class Main extends JFrame{
    
     JFrame testFrame;
-    public static  JButton btnStart,btnDatabase,btnDrop;
+    public static  JButton btnStart,btnDatabase,btnViewSite;
     public static JLabel lblScrape,lblError;
     
     //public static String[] publicRunners = new String[164];
@@ -77,18 +78,18 @@ public class Main extends JFrame{
             }
             
         });
-        btnDrop = new JButton("Clear Table");
-        btnDrop.setBounds(350,130,150,30);
-        btnDrop.addActionListener(new ActionListener(){
+        btnViewSite = new JButton("View Website");
+        btnViewSite.setBounds(350,130,150,30);
+        btnViewSite.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                btnDropActionPerformed();
+                btnViewsitePerformed();
             }
             
         });
         
         btnDatabase.setEnabled(false);
-        btnDrop.setEnabled(false);
+        btnViewSite.setEnabled(true);
         
         lblScrape = new JLabel("Data has not been scraped...");
         lblScrape.setBounds(10,100,300,30);
@@ -98,7 +99,7 @@ public class Main extends JFrame{
         
         pnlButtons.add(btnStart);
         pnlButtons.add(btnDatabase);
-        pnlButtons.add(btnDrop);
+        pnlButtons.add(btnViewSite);
         pnlButtons.add(lblScrape);
         pnlButtons.add(lblError);
         
@@ -184,9 +185,13 @@ public class Main extends JFrame{
         
     }
     
-    private void btnDropActionPerformed(){
-        db.dropRaceTable();
-        lblScrape.setText("Race table cleared");
+    private void btnViewsitePerformed(){
+        try{
+             String url = "http://www.westiesrunners.com";
+             Desktop.getDesktop().browse(java.net.URI.create(url));
+         }catch(java.io.IOException e){
+             Main.lblError.setText(e.getMessage());
+         }
     }
         
     public static void beginScrape(){  

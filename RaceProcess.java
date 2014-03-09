@@ -90,7 +90,7 @@ class RaceProcess implements Runnable {
         Main.raceCounter.decrementAndGet();
         if(Main.raceCounter.get() == 0){
             Main.btnDatabase.setEnabled(true);
-            Main.btnDrop.setEnabled(true);
+            Main.btnViewSite.setEnabled(true);
             Main.scrapeCompleted = true;
             Main.btnStart.setText("Visit website");
             Main.lblScrape.setText("Scrape completed");

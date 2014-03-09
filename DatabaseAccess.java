@@ -328,6 +328,8 @@ public class DatabaseAccess {
             boolean update = st.execute(sql);
            
             System.out.println("All runner tables uploaded");
+            Main.lblScrape.setText("Tables uploaded successfully");
+            
             
 
         } catch (Exception e) {

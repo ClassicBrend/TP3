@@ -14,7 +14,6 @@ class RaceProcess implements Runnable {
     private String raceID;
     
     public RaceProcess(int id, String raceID){
-        System.out.println("RACE PROCESS - RACEID = " + raceID);
         this.id = id;
         this.raceID = raceID;
     }
@@ -92,7 +91,6 @@ class RaceProcess implements Runnable {
             Main.btnDatabase.setEnabled(true);
             Main.btnViewSite.setEnabled(true);
             Main.scrapeCompleted = true;
-            Main.btnStart.setText("Visit website");
             Main.lblScrape.setText("Scrape completed");
             //Main.uploadTables();
         }      

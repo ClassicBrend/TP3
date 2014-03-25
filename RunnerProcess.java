@@ -67,8 +67,7 @@ class RunnerProcess implements Runnable {
             String year = origDate.substring(6,10);
             String month = origDate.substring(3,5);
             String day = origDate.substring(0,2);
-            String formattedDate = (year + "-" + month + "-" + day);
-            System.out.println(formattedDate);
+            String formattedDate = (year + "-" + month + "-" + day);;
            
             content += runnerID + ",";
             content += position.next().text();
@@ -82,8 +81,6 @@ class RunnerProcess implements Runnable {
                 content += "\n";
             nameOfRace = name;
 
-            
-            System.out.println("RACE ID STRING = " +raceID);
             Main.raceSet.add(raceID);
             
         }

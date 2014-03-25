@@ -89,7 +89,7 @@ public class Main extends JFrame{
         });
         
         btnDatabase.setEnabled(false);
-        btnViewSite.setEnabled(true);
+        btnViewSite.setEnabled(false);
         
         lblScrape = new JLabel("Data has not been scraped...");
         lblScrape.setBounds(10,100,300,30);
@@ -164,17 +164,7 @@ public class Main extends JFrame{
         }
     }
     
-    private void btnTableActionPerformed(){
-/////////////ORIGINALCODE///////////////////////////
-//        DatabaseAccess db = new DatabaseAccess();
-//        db.go();
-//        db.dropTable("test");
-//        db.dropTable("races");
-//        db.updateRaceTable();
-//        db.updateRunnerTable();
-//        System.out.println("GREAT SUCCESS");
-/////////////////////////////////////////////////////
-        
+    private void btnTableActionPerformed(){       
         db.go();
         db.dropTable("test");
         db.dropTable("races");
@@ -357,8 +347,6 @@ public class Main extends JFrame{
             
             exec2.submit(new RaceProcess(count,raceInfo));
             count++;
-            System.out.println(count);
-            
         }
 
         exec2.shutdown();
@@ -416,28 +404,7 @@ public class Main extends JFrame{
         writeOutCsv("CSVFiles/RaceList/"+raceInfo, ven + "," + distance.text() + "," + climb.text() + "," + mensRecordTime.text() + "," + mensRecordYear.text()
          + "," + womensRecordTime.text() + "," + womensRecordYear.text() + "," + womensRecordName.text());
 
-//        System.out.println(venue.text());
-//        System.out.println(distance.text());
-//        System.out.println(climb.text());
-//        System.out.println(mensRecordTime.text());
-//        System.out.println(mensRecordYear.text());
-//        System.out.println(mensRecordName.text());
-//        System.out.println(womensRecordTime.text());
-//        System.out.println(womensRecordYear.text());
-//        System.out.println(womensRecordName.text());
-//        System.out.println("-------");
-
         
     }
-    
-    
-    public static void uploadTables() {
-//        DatabaseAccess db = new DatabaseAccess();
-//        db.go();
-//        //db.dropRaceTable();
-//        db.updateRaceTable();
-//        System.out.println("GREAT SUCCESS");
         
-    }
-    
 }

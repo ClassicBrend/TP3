@@ -26,7 +26,6 @@ public class Main extends JFrame{
     public static  JButton btnStart,btnDatabase,btnViewSite;
     public static JLabel lblScrape,lblError;
     
-    //public static String[] publicRunners = new String[164];
     public static ArrayList<String> publicRunners = new ArrayList<String>();
     static AtomicInteger runnerCounter = new AtomicInteger(0);
     static AtomicInteger raceCounter = new AtomicInteger(0);
@@ -138,6 +137,9 @@ public class Main extends JFrame{
             RunnerList.mkdirs();
             RaceList.mkdirs();
 
+            // If the data has not yet been scraped
+            // Delete all the old csv files and begin the scrape
+            // by passing outjobs to the threads using RunnerProcess
             if(!ranScrape){
                 lblScrape.setText("Scraping...");
                 lblError.setText("");
@@ -155,6 +157,8 @@ public class Main extends JFrame{
                 System.out.println("RunnerList created, creating individual runners files\n");
             }
         } else {
+           // If the data has been scraped then the button will simply send 
+           // the user to the website
                 String page = "http://www.westiesrunners.com";
             try {
                 java.awt.Desktop.getDesktop().browse(java.net.URI.create(page));
@@ -164,6 +168,8 @@ public class Main extends JFrame{
         }
     }
     
+    // When the button is clicked the relevant tables
+    // are dropped and then updated
     private void btnTableActionPerformed(){       
         db.go();
         db.dropTable("test");
@@ -175,6 +181,7 @@ public class Main extends JFrame{
         
     }
     
+    // Direct the user to the website
     private void btnViewsitePerformed(){
         try{
              String url = "http://www.westiesrunners.com";
@@ -188,10 +195,7 @@ public class Main extends JFrame{
         try {
             int amount = 0;
             final String clubURL = "http://www.scottishhillracing.co.uk/Runners.aspx?ClubID=C1076";
-            //Document doc = Jsoup.connect(clubURL).timeout(timeOutPeriod).get();
             Document doc = Jsoup.connect(clubURL).timeout(timeOutPeriod).ignoreHttpErrors(true).get();
-            //writeOutCsv("CSVFiles/RunnerList/runnerDetails", "Surname,Forename,runnerID,averageWin,racesRecorded,gender");
-            
             
             getDetails(doc,amount);
             
@@ -280,19 +284,13 @@ public class Main extends JFrame{
         then calls writeOutCsv with the relevant data.
     */
     public static void RunnerDetails(String name, String rID,double avgWin, int racRec,String gen, int runners, int runner){
-        //DatabaseAccess db = new DatabaseAccess();
-       // db.go();
-        
-        
-        
+
         String fullName = name;
         String[] split = fullName.split(",");
         String secondName = split[0];
         String firstName = split[1];
         writeOutCsv("CSVFiles/RunnerList/runnerDetails",rID + "," + secondName + "," +
                 firstName +  "," + avgWin + "," + racRec + "," + gen);
-        //db.updateRunnerTable(rID, secondName, firstName, avgWin, racRec, gen);
-
     }
     
     /*

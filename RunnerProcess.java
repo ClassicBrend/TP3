@@ -85,10 +85,6 @@ class RunnerProcess implements Runnable {
             
         }
       
-
-        
-        //System.out.print(content);
-
         Main.writeOutCsv("CSVFiles/Individual/runners", content);
         
         //test.raceSet.add(theYear+"."+raceID);     

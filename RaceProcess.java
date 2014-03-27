@@ -64,7 +64,6 @@ class RaceProcess implements Runnable {
         
         String ven = venue.text();
         ven = ven.replace(",", "");
-//        ven = ven.replace("-", "");
         
         String dist = distance.text();
         dist = dist.replace("km","");

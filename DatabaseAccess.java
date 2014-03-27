@@ -48,7 +48,6 @@ public class DatabaseAccess {
     public void updateRaceTable(){
        Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -56,7 +55,6 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
             Statement st = con.createStatement();
@@ -79,7 +77,6 @@ public class DatabaseAccess {
     public void createRunnersTable(ArrayList<String> publicRunners){
         Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -87,7 +84,6 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
             for(int i = 0; i < publicRunners.size(); i++){
@@ -142,7 +138,6 @@ public class DatabaseAccess {
     public void oldCreateRunnerTable(ArrayList<String> publicRunners){
         Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -150,12 +145,7 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
-
-
-           
-                    //String runnerID = publicRunners.get(i);
 
                     File file = new File(Main.jarPath+"CSVFiles/Individual/runners.csv");
                     Scanner input = new Scanner(file);
@@ -172,8 +162,6 @@ public class DatabaseAccess {
                             + ")";
                    
                     boolean update = st.execute(sql);
-                   // Main.lblScrape.setText("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
-                    //System.out.println("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
                     int counter = 0;
                     while(input.hasNextLine()){
                         counter++;
@@ -208,7 +196,6 @@ public class DatabaseAccess {
     public void createRunnerTable(ArrayList<String> publicRunners){
         Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -216,7 +203,6 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
             Statement st = con.createStatement();
@@ -231,8 +217,6 @@ public class DatabaseAccess {
                     + ")";
 
             boolean update = st.execute(sql);
-           // Main.lblScrape.setText("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
-            //System.out.println("Processing " + runnerID + "("+i+"/"+publicRunners.size() + ")");
             int counter = 0;
                     
             st = con.createStatement();
@@ -255,7 +239,6 @@ public class DatabaseAccess {
     public void dropRaceTable(){
         Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -263,7 +246,6 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
 
@@ -281,7 +263,6 @@ public class DatabaseAccess {
     public void dropTable(String tableName){
                 Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -289,7 +270,6 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
 
@@ -307,7 +287,6 @@ public class DatabaseAccess {
     public void updateRunnerTable(){
        Connection con = null;
         String driver = "com.mysql.jdbc.Driver";
-        //String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String url = "jdbc:mysql://" + rhost + ":" + lport + "/" + "westies_db";
         System.out.println(url);
         String db = "westies_db";
@@ -315,7 +294,6 @@ public class DatabaseAccess {
         String dbPasswd = "TeamBA2013";
         try {
             Class.forName(driver);
-            //con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
             con = DriverManager.getConnection(url, dbUser, dbPasswd);
 
             Statement st = con.createStatement();
